@@ -5,9 +5,10 @@ import App from "./App.jsx";
 import "./index.css";
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
+import "dotenv/config";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCHHKUpZqCEkIMUYim5uTiJqZsSCvgDvig",
+  apiKey: process.env.FIREBASE_APIKEY,
   authDomain: "reactblog-b6033.firebaseapp.com",
   projectId: "reactblog-b6033",
   storageBucket: "reactblog-b6033.appspot.com",

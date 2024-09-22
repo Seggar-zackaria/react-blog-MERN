@@ -12,28 +12,44 @@ const Article = () => {
   const [articleInfo, setArticleInfo] = useState({
     upvote: 0,
     comments: [],
+    canUpvote: false,
   });
+  const { canUpvote } = articleInfo;
   const { articleId } = useParams();
 
-  const { user, isloading } = useUser;
+  const { user, isloading } = useUser();
 
   useEffect(() => {
     const loadArticleInfo = async () => {
+      const token = user && (await user.getIdToken());
+      const headers = token ? { authtoken: token } : {};
+
       const response = await axios.get(
-        `http://localhost:8000/api/articles/${articleId}`
+        `http://localhost:8000/api/articles/${articleId}`,
+        { headers }
       );
 
       const newArticleInfo = response.data;
 
       setArticleInfo(newArticleInfo);
     };
-    loadArticleInfo();
-  }, [articleId]);
+    if (!isloading) {
+      loadArticleInfo();
+    }
+  }, [isloading, user]);
 
   const article = Articles.find((article) => article.name === articleId);
 
   async function addUpvote() {
-    await axios.put(`http://localhost:8000/api/articles/${articleId}/upvote`);
+    const token = user && (await user.getIdToken());
+    const headers = token ? { authtoken: token } : {};
+    await axios.put(
+      `http://localhost:8000/api/articles/${articleId}/upvote`,
+      null,
+      {
+        headers,
+      }
+    );
 
     const response = await axios.get(
       `http://localhost:8000/api/articles/${articleId}`
@@ -52,7 +68,9 @@ const Article = () => {
       <h1>{article.title}</h1>
       <div className="upvotes-section">
         {user ? (
-          <button onClick={addUpvote}>upvote</button>
+          <button onClick={addUpvote}>
+            {canUpvote ? "upvote" : "Already Upvoted"}
+          </button>
         ) : (
           <button>
             <Link to={"/signin"}>logIn to upvote</Link>
@@ -73,7 +91,6 @@ const Article = () => {
           />
         ) : (
           <button>
-            {" "}
             <Link to={"/signin"}>logIn to add a comment</Link>
           </button>
         )}
